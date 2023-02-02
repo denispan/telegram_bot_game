@@ -1,4 +1,4 @@
-const {gameOptions, againOptions} = require('./options');
+const {gameOptions, againOptions, startOptions} = require('./options');
 
 const TelegramApi = require('node-telegram-bot-api');
 
@@ -9,16 +9,22 @@ const bot = new TelegramApi(token, {polling: true});
 const chats = {};
 
 const startGame = async (chatId) => {
-  const randomNum = Math.floor(Math.random()*10);
+
+  const randomNum = Math.floor(Math.random()*3 + 1);
   chats[chatId] = randomNum;
   await bot.sendMessage(chatId, 'Отгадывайте!', gameOptions)
+};
+
+const startInfo = async (chatId, msg) => {
+  console.log(msg);
+  await bot.sendMessage(chatId, `Меня зовут Денчик, а тебя ${msg.from.first_name}`)
 }
 
 const start = () => {
   bot.on('message', async (msg) => {
     const text = msg.text;
     const chatId = msg.chat.id;
-    console.log(msg);
+
 
     bot.setMyCommands([
       {
@@ -34,15 +40,16 @@ const start = () => {
 
     if (text === '/start') {
       await bot.sendSticker(chatId, 'https://tlgrm.eu/_/stickers/22c/b26/22cb267f-a2ab-41e4-8360-fe35ac048c3b/192/1.webp');
-      return bot.sendMessage(chatId, 'Чатбот denpan приветствует Вас. Выберете в меню интересующий пункт.');
+      return bot.sendMessage(chatId, 'Чатбот denpan приветствует Вас. Выберете в меню интересующий пункт.', startOptions);
+
     }
 
     if (text === '/info') {
-      return bot.sendMessage(chatId, `Меня зовут Денчик, а тебя ${msg.from.first_name}`);
+      return startInfo(chatId, msg);
     }
 
     if (text === '/game') {
-      await bot.sendMessage(chatId, `Сейчас я загадаю число от 1 до 9, а Вам нужно будет его отгадать 😏`);
+      await bot.sendMessage(chatId, `Сейчас я загадаю число от 1 до 3, а Вам нужно будет его отгадать 😏`);
       return startGame(chatId);
     }
 
@@ -53,6 +60,15 @@ const start = () => {
   bot.on('callback_query', async msg => {
     const data = msg.data;
     const chatId = msg.message.chat.id;
+
+    if (data === '/game') {
+      await bot.sendMessage(chatId, `Сейчас я загадаю число от 1 до 3, а Вам нужно будет его отгадать 😏`);
+      return startGame(chatId);
+    }
+
+    if (data === '/info') {
+      return startInfo(chatId, msg);
+    }
 
     if (data === '/again') {
       return startGame(chatId);
