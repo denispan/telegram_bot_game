@@ -14,7 +14,7 @@ module.exports = {
   startOptions: {
     reply_markup: JSON.stringify({
       inline_keyboard: [
-        [{text: 'Познакомиться', callback_data: '/info'}, {text: 'Поиграть', callback_data: '/game'},]
+        [{text: 'Познакомиться', callback_data: '/info'}, {text: 'Поиграть', callback_data: '/game'}, {text: 'Узнать погоду', callback_data: '/weather'},]
       ]
     })
   },
