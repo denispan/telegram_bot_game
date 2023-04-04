@@ -1,13 +1,16 @@
 const {gameOptions, againOptions, startOptions} = require('./options');
+const botApi = require('./config');
 
 const TelegramApi = require('node-telegram-bot-api');
 const axios = require('axios');
 
-const token = '5737606412:AAG7JAXN5nBwdBlHKNk4HPvLBEFSeD6dMvI';
+const token = botApi;
 
 const bot = new TelegramApi(token, {polling: true});
 
-const farengToC = (farengate) => Math.round(farengate/37.8);
+const farengToC = (farengate) => Math.round((farengate/10-32) / 1.8);
+
+const barToMm = (bar) => Math.round((bar/1000)*750.064);
 
 const chats = {};
 
@@ -18,7 +21,7 @@ const startGame = async (chatId) => {
 };
 
 const startInfo = async (chatId, msg) => {
-  await bot.sendMessage(chatId, `Меня зовут Денчик, а Вас ${msg.from.first_name}`)
+  await bot.sendMessage(chatId, `Меня зовут Денис, а Вас ${msg.from.first_name}`)
 }
 
 const startWeather= async (chatId) => {
@@ -43,7 +46,7 @@ const start = () => {
         command: '/game', description: 'Игра'
       },
       {
-        command: '/weather', description: 'Погода"'
+        command: '/weather', description: 'Погода'
       },
     ])
 
@@ -70,7 +73,8 @@ const start = () => {
       const url = `https://api.openweathermap.org/data/2.5/weather?lat=${msg.location.latitude}&lon=${msg.location.longitude}&appid=67b5008e3c6240c8a741c2c506623565`;
       try {
         const resp = await axios(url);
-        await bot.sendMessage(chatId, `Сейчас в ${resp.data.name} ${farengToC(resp.data.main.temp)}°, скорость ветра ${resp.data.wind.speed}м/c`);
+        console.log(resp);
+        await bot.sendMessage(chatId, `Сейчас в ${resp.data.name} ${farengToC(resp.data.main.temp)}°, скорость ветра ${resp.data.wind.speed} м/c, давление ${barToMm(resp.data.main.pressure)} мм рт.ст.`);
         return;
       } catch (err) {
         await bot.sendMessage(chatId, `Не могу загрузить данные`);
